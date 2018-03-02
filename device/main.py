@@ -17,8 +17,9 @@ sensor = Ultrasonic(trigPin, echoPin)
 
 # 100 milli seconds interval, 10 samples per second
 interval=100 
-# 10 minutes per call to the server
-max_count=int(1000/interval)*60
+# 20 seconds per call to the server
+# can't post too big data
+max_count=int(1000/interval)*20
 
 data=['-1']*max_count
 

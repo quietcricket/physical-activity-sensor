@@ -40,7 +40,6 @@ class Ultrasonic:
         start = 0
         end = 0
 
-        # Create a microseconds counter.
 
         # Send a 10us pulse.
         self.trigger.on()
