@@ -1,2 +1,6 @@
 *.pyc
 web/*.txt
+.idea
+ai/plot
+ai/data
+ai/clean-data

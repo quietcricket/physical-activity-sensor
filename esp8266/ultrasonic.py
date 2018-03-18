@@ -21,6 +21,7 @@
 import machine
 import utime
 
+
 # Pin configuration.
 # WARNING: Do not use PA4-X5 or PA5-X6 as the echo pin without a 1k resistor.
 
@@ -40,12 +41,11 @@ class Ultrasonic:
         start = 0
         end = 0
 
-
         # Send a 10us pulse.
         self.trigger.on()
         utime.sleep_us(10)
         self.trigger.off()
-        t=machine.time_pulse_us(self.echo,1)
+        t = machine.time_pulse_us(self.echo, 1)
         # Calc the duration of the recieved pulse, divide the result by
         # 2 (round-trip) and divide it by 29 (the speed of sound is
         # 340 m/s and that is 29 us/cm).
