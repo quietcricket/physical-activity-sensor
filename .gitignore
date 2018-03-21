@@ -3,4 +3,5 @@ web/*.txt
 .idea
 ai/plot
 ai/data
+ai/data-backup
 ai/clean-data
