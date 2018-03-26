@@ -1,20 +1,9 @@
-#!/usr/bin/python
-# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-# |R|a|s|p|b|e|r|r|y|P|i|-|S|p|y|.|c|o|.|u|k|
-# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#
-# ultrasonic_1.py
-# Measure distance using an ultrasonic module
-#
-# Author : Matt Hawkins
-# Date   : 09/01/2013
 
 # Import required Python libraries
+from datetime import datetime
 import time
 import os
 import RPi.GPIO as GPIO
-import logging
-from logging.handlers import TimedRotatingFileHandler
 
 # Use BCM GPIO references
 # instead of physical pin numbers
@@ -23,15 +12,6 @@ GPIO.setmode(GPIO.BCM)
 # Define GPIO to use on Pi
 GPIO_TRIGGER = 23
 GPIO_ECHO = 24
-
-logger = logging.getLogger('Physical Activityes')
-logger.setLevel(logging.INFO)
-handler = TimedRotatingFileHandler('data/activities.log', when="midnight")
-logger.addHandler(handler)
-if not os.path.exists('data'):
-    os.mkdir('data')
-print "Ultrasonic Measurement"
-
 # Set pins as output and input
 GPIO.setup(GPIO_TRIGGER, GPIO.OUT)  # Trigger
 GPIO.setup(GPIO_ECHO, GPIO.IN)  # Echo
@@ -41,6 +21,7 @@ GPIO.output(GPIO_TRIGGER, False)
 
 # Allow module to settle
 time.sleep(1)
+
 data = []
 
 
@@ -68,13 +49,26 @@ def read_distance():
     distance = distance / 2
     return round(distance, 1)
 
+# Create a folder to keep all the data
+if not os.path.exists('data'):
+    os.mkdir('data')
 
-while True:
-    data.append(str(read_distance()))
-    if len(data) >= 100:
-        logger.info(','.join(data))
-        data = []
-    else:
-        time.sleep(0.1)
-# Reset GPIO settings
-GPIO.cleanup()
+if __name__ == '__main__':
+
+    # 10 readings per second
+    READ_FREQUENCEY=0.1
+    # save the log once per minute 
+    LOG_FREQUENCY=60/READ_FREQUENCEY
+
+    while True:
+        data.append(str(read_distance()))
+        if len(data) ==LOG_FREQUENCY:
+            t=datetime.now()
+            with open(t.strftime('data/%Y-%m-%d.txt'),'a') as f:
+                f.write(t.strftime('%H:%M')+','.join()+"\n")
+                data = []
+        else:
+            time.sleep(READ_FREQUENCEY)
+    # Reset GPIO settings
+    GPIO.cleanup()
+

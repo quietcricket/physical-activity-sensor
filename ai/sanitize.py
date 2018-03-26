@@ -5,7 +5,7 @@ import numpy as np
 
 
 def list_data(folder='data'):
-    return [f for f in os.listdir(folder) if f.find('.log.') > -1]
+    return [f for f in os.listdir(folder) if f.endswith('txt')]
 
 
 def reject_outliers(input_arr, m=2):
@@ -17,7 +17,7 @@ def clean_data(filename):
     arr = []
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     for l in data_lines:
-        arr += [float(x) for x in l.split(',') if len(x) > 0 and x[0] in digits]
+        arr += [float(x) for x in l.split(',')[1:] if len(x) > 0 and x[0] in digits]
     arr = reject_outliers(np.asarray(arr))
     window = 11
     weight = np.ones(window) / float(window)
