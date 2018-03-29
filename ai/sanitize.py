@@ -2,6 +2,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
+from datetime import datetime, timedelta
 
 
 def list_data(folder='data'):
@@ -14,16 +15,31 @@ def reject_outliers(input_arr, m=2):
 
 def clean_data(filename):
     data_lines = open('data/{}'.format(filename)).readlines()
-    arr = []
-    digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
-    for l in data_lines:
-        arr += [float(x) for x in l.split(',')[1:] if len(x) > 0 and x[0] in digits]
-    arr = reject_outliers(np.asarray(arr))
+    output_file = open('clean-data/{}'.format(filename), 'w')
+    t=datetime.strptime('00:01','%H:%M')
+    empty_record=','.join(['0']*600)
+
     window = 11
     weight = np.ones(window) / float(window)
-    out = np.convolve(arr, weight / weight.sum(), 'same')
-    output_file = open('clean-data/{}'.format(filename), 'w')
-    output_file.write(','.join([str(x) for x in out]))
+    all_data=[None]*60*24
+    for l in data_lines:
+        # Avoid empty lines
+        if len(l)<3:
+            continue
+        arr = l.split(',')
+        hh,mm=arr[0].split(':')
+        index=int(hh)*60+int(mm)
+
+        while all_data[index] is not None:
+            index+=1
+
+        data=reject_outliers(np.asarray([float(x) for x in arr[1:]]))
+        out = np.convolve(data, weight / weight.sum(), 'same')
+        all_data[index]=','.join(str(x) for x in out)
+    for i in range(0,len(all_data)):
+        if all_data[i] is None:
+            all_data[i]=empty_record
+    output_file.write(",".join(all_data))
     output_file.close()
 
 
@@ -33,7 +49,7 @@ def plot_data(filename):
     plt.plot(x, arr)
     fig = plt.gcf()
     fig.set_size_inches(30, 10)
-    fig.savefig('plot/{}.png'.format(filename))
+    fig.savefig('plot/{}.png'.format(filename[:-4]))
     plt.clf()
 
 
