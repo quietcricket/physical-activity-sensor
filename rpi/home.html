@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>PAS Data Visualizer</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+              integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+              crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+
+    </head>
+    <body>
+        <div class="container-fluid p-4">
+            <div class="row">
+                <div class="col-4">
+                    {% for d in data %}
+                        <h2>{{ d }}</h2>
+                        {% for m in data[d] %}
+                            <a href="javascript:draw('{{ d }}','{{ m[:-4] }}')"
+                               class="btn btn-primary btn-sm mb-2">{{ m[:-4] }}</a>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+                <div class="col-8">
+                    <canvas id="chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let ctx = document.querySelector('canvas#chart').getContext('2d');
+            let chart;
+
+            function draw(day, minute) {
+                let form = new FormData();
+                form.append('day', day);
+                form.append('minute', minute);
+                fetch(new Request('/data'), {
+                    body: form,
+                    method: 'POST'
+                }).then(resp => resp.text().then(text => {
+                        let numbers = text.split(',').map(x => parseInt(x));
+                        let labels = [];
+                        for (let i = 0; i < numbers.length; i++) {
+                            labels[i] = i + 1;
+                        }
+                        let data = {datasets: [{data: numbers, label: day + ' ' + minute}], labels: labels};
+                        if (chart) {
+                            chart.destroy();
+                        }
+                        chart = new Chart(ctx, {type: 'line', data: data});
+                    })
+                );
+            }
+        </script>
+    </body>
+</html>
